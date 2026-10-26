@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Internship Management System</title>
+
+<style>
+:root {
+  --blue: #3157d5;
+  --dark: #192747;
+  --bg: #f4f6fb;
+  --border: #e4e8f1;
+  --muted: #737f96;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: var(--bg);
+  color: var(--dark);
+}
+.layout { display: flex; min-height: 100vh; }
+.sidebar {
+  width: 235px;
+  background: #fff;
+  border-right: 1px solid var(--border);
+  padding: 24px 16px;
+  flex-shrink: 0;
+}
+.brand { font-size: 20px; font-weight: bold; margin: 4px 8px 8px; }
+.brand span { color: var(--blue); }
+.subbrand { color: var(--muted); font-size: 12px; margin: 0 8px 32px; }
+.nav-label {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  margin: 20px 10px 10px;
+}
+.nav-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  padding: 12px;
+  border-radius: 9px;
+  cursor: pointer;
+  color: #536078;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+.nav-btn:hover, .nav-btn.active {
+  background: #edf1ff;
+  color: var(--blue);
+  font-weight: bold;
+}
+.main { flex: 1; min-width: 0; }
+.topbar {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  padding: 17px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.topbar small { color: var(--muted); }
+.avatar {
+  background: #e5ebff;
+  color: var(--blue);
+  padding: 10px;
+  border-radius: 50%;
+  font-weight: bold;
+}
+.content { padding: 28px; max-width: 1500px; margin: auto; }
+h1 { font-size: 26px; margin: 0 0 8px; }
+h2 { font-size: 17px; margin: 0 0 18px; }
+p { color: var(--muted); }
+.page-desc { margin: 0 0 24px; font-size: 14px; }
+.page { display: none; }
+.page.active { display: block; }
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 22px;
+}
+.card, .panel {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  padding: 21px;
+  min-width: 0;
+}
+.stat-label { color: var(--muted); font-size: 13px; }
+.stat-number { font-size: 30px; font-weight: bold; margin: 12px 0 6px; }
+.stat-note { font-size: 12px; color: var(--muted); }
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.panel { margin-bottom: 20px; }
+.panel-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+button, input, select, textarea { font: inherit; }
+.btn {
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.btn-primary { background: var(--blue); color: white; }
+.btn-primary:hover { background: #2445b8; }
+.btn-light { background: #edf1ff; color: var(--blue); }
+.btn-danger { background: #fff0f0; color: #c53b3b; }
+.btn-small { padding: 7px 9px; font-size: 12px; }
+.actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.toolbar { display: flex; gap: 10px; flex-wrap: wrap; }
+.toolbar input { min-width: 180px; flex: 1; }
+input, select, textarea {
+  width: 100%;
+  border: 1px solid #dce2ee;
+  background: #fff;
+  border-radius: 8px;
+  padding: 11px;
+  color: var(--dark);
+  outline: none;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--blue);
+}
+label { font-size: 12px; font-weight: bold; display: block; margin-bottom: 7px; }
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 15px;
+}
+.field.full { grid-column: 1 / -1; }
+.form-actions { display: flex; gap: 8px; margin-top: 17px; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th {
+  background: #f8f9fc;
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  text-align: left;
+}
+th, td { padding: 13px 12px; border-bottom: 1px solid #edf0f5; }
+td { vertical-align: middle; }
+tbody tr:last-child td { border-bottom: 0; }
+.person { font-weight: bold; }
+.secondary { color: var(--muted); font-size: 12px; margin-top: 4px; }
+.badge {
+  display: inline-block;
+  padding: 5px 9px;
+  border-radius: 20px;
+  font-size: 11px;
+  background: #edf1f7;
+  color: #58657c;
+  white-space: nowrap;
+}
+.badge.active, .badge.completed { background: #e2f7eb; color: #197a48; }
+.badge.pending, .badge.scheduled { background: #fff2d7; color: #956000; }
+.badge.progress { background: #e5edff; color: #3157d5; }
+.badge.overdue { background: #ffe7e7; color: #b72e2e; }
+.empty { text-align: center; padding: 30px; color: var(--muted); }
+.quick-btns { display: flex; flex-wrap: wrap; gap: 10px; }
+.footer { text-align: center; padding: 18px; color: var(--muted); font-size: 12px; }
+.hidden { display: none !important; }
+
+@media (max-width: 900px) {
+  .sidebar { width: 190px; }
+  .stats { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .two-col { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .layout { display: block; }
+  .sidebar { width: 100%; padding: 14px; border-right: 0; }
+  .subbrand, .nav-label { display: none; }
+  .brand { margin-bottom: 12px; }
+  .nav-btn { display: inline-block; width: auto; margin: 2px; padding: 9px; }
+  .topbar { padding: 14px; }
+  .content { padding: 16px; }
+  .stats { gap: 9px; }
+  .card, .panel { padding: 15px; }
+  .stat-number { font-size: 25px; }
+  .form-grid { grid-template-columns: 1fr; }
+  .field.full { grid-column: auto; }
+}
+</style>
+</head>
+
+<body>
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="brand">Intern<span>Flow</span></div>
+    <div class="subbrand">Internship Management System</div>
+
+    <div class="nav-label">WORKSPACE</div>
+    <button class="nav-btn active" data-page="dashboard">▦ &nbsp; Dashboard</button>
+    <button class="nav-btn" data-page="interns">♙ &nbsp; Intern Records</button>
+    <button class="nav-btn" data-page="tasks">☷ &nbsp; Task Management</button>
+    <button class="nav-btn" data-page="reviews">▣ &nbsp; Review Management</button>
+
+    <div class="nav-label">DATA</div>
+    <button class="nav-btn" id="exportBtn">↓ &nbsp; Export Backup</button>
+    <button class="nav-btn" id="importBtn">↑ &nbsp; Import Backup</button>
+    <input id="importFile" type="file" accept=".json" class="hidden">
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <strong id="topTitle">Dashboard</strong><br>
+        <small>Internship Management Workspace</small>
+      </div>
+      <div class="avatar">IM</div>
+    </header>
+
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <section class="page active" id="dashboard">
+        <h1>Dashboard</h1>
+        <p class="page-desc">Welcome! Here is an overview of your internship programme.</p>
+
+        <div class="stats">
+          <div class="card">
+            <div class="stat-label">Total Interns</div>
+            <div class="stat-number" id="totalInterns">0</div>
+            <div class="stat-note">Registered interns</div>
+          </div>
+          <div class="card">
+            <div class="stat-label">Active Interns</div>
+            <div class="stat-number" id="activeInterns">0</div>
+            <div class="stat-note">Currently participating</div>
+          </div>
+          <div class="card">
+            <div class="stat-label">Pending Tasks</div>
+            <div class="stat-number" id="pendingTasks">0</div>
+            <div class="stat-note">Tasks awaiting completion</div>
+          </div>
+          <div class="card">
+            <div class="stat-label">Upcoming Reviews</div>
+            <div class="stat-number" id="upcomingReviews">0</div>
+            <div class="stat-note">Scheduled from today</div>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="panel">
+            <div class="panel-heading">
+              <h2>Recent Tasks</h2>
+              <button class="btn btn-light" onclick="showPage('tasks')">View tasks</button>
+            </div>
+            <div id="dashboardTasks"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-heading">
+              <h2>Upcoming Reviews</h2>
+              <button class="btn btn-light" onclick="showPage('reviews')">View reviews</button>
+            </div>
+            <div id="dashboardReviews"></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Quick Actions</h2>
+          <div class="quick-btns">
+            <button class="btn btn-primary" onclick="showPage('interns')">+ Manage Interns</button>
+            <button class="btn btn-light" onclick="showPage('tasks')">+ Assign a Task</button>
+            <button class="btn btn-light" onclick="showPage('reviews')">+ Schedule a Review</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- INTERNS -->
+      <section class="page" id="interns">
+        <h1>Intern Records</h1>
+        <p class="page-desc">Add and manage intern information.</p>
+
+        <div class="panel">
+          <h2 id="internFormTitle">Add New Intern</h2>
+          <form id="internForm">
+            <input type="hidden" id="internEditId">
+            <div class="form-grid">
+              <div class="field">
+                <label for="internName">Full Name *</label>
+                <input id="internName" required placeholder="Enter full name">
+              </div>
+              <div class="field">
+                <label for="internEmail">Email *</label>
+                <input id="internEmail" type="email" required placeholder="name@example.com">
+              </div>
+              <div class="field">
+                <label for="internJoining">Joining Date *</label>
+                <input id="internJoining" type="date" required>
+              </div>
+              <div class="field">
+                <label for="internDuration">Duration</label>
+                <select id="internDuration">
+                  <option>1 month</option>
+                  <option>2 months</option>
+                  <option selected>3 months</option>
+                  <option>6 months</option>
+                  <option>12 months</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="internTopic">Internship Topic</label>
+                <input id="internTopic" placeholder="e.g. Artificial Intelligence">
+              </div>
+              <div class="field">
+                <label for="internStatus">Status</label>
+                <select id="internStatus">
+                  <option>Active</option>
+                  <option>Completed</option>
+                  <option>On Hold</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-primary" type="submit">Save Intern</button>
+              <button class="btn btn-light" type="button" onclick="resetInternForm()">Clear</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="panel">
+          <div class="panel-heading">
+            <h2>All Interns</h2>
+            <div class="toolbar">
+              <input id="internSearch" placeholder="Search name, email or ID...">
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th>ID / Intern</th><th>Email</th><th>Joining Date</th>
+                <th>Topic</th><th>Status</th><th>Actions</th>
+              </tr></thead>
+              <tbody id="internTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TASKS -->
+      <section class="page" id="tasks">
+        <h1>Task Management</h1>
+        <p class="page-desc">Assign tasks, set deadlines and track progress.</p>
+
+        <div class="panel">
+          <h2>Assign New Task</h2>
+          <form id="taskForm">
+            <div class="form-grid">
+              <div class="field">
+                <label for="taskIntern">Select Intern *</label>
+                <select id="taskIntern" required></select>
+              </div>
+              <div class="field">
+                <label for="taskTitle">Task Title *</label>
+                <input id="taskTitle" required placeholder="e.g. Build a Python project">
+              </div>
+              <div class="field full">
+                <label for="taskDescription">Task Description</label>
+                <textarea id="taskDescription" rows="3" placeholder="Explain the task and expected result..."></textarea>
+              </div>
+              <div class="field">
+                <label for="taskDeadline">Deadline *</label>
+                <input id="taskDeadline" type="date" required>
+              </div>
+              <div class="field">
+                <label for="taskStatus">Task Status</label>
+                <select id="taskStatus">
+                  <option>Pending</option>
+                  <option>In Progress</option>
+                  <option>Completed</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-primary" type="submit">Save Task</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="panel">
+          <div class="panel-heading">
+            <h2>Assigned Tasks</h2>
+            <select id="taskFilter" style="max-width:200px">
+              <option value="All">All Tasks</option>
+              <option>Pending</option>
+              <option>In Progress</option>
+              <option>Completed</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th>Task</th><th>Intern</th><th>Deadline</th>
+                <th>Status</th><th>Actions</th>
+              </tr></thead>
+              <tbody id="taskTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- REVIEWS -->
+      <section class="page" id="reviews">
+        <h1>Review Management</h1>
+        <p class="page-desc">Schedule review meetings and record intern feedback.</p>
+
+        <div class="panel">
+          <h2>Schedule New Review</h2>
+          <form id="reviewForm">
+            <div class="form-grid">
+              <div class="field">
+                <label for="reviewIntern">Select Intern *</label>
+                <select id="reviewIntern" required></select>
+              </div>
+              <div class="field">
+                <label for="reviewDate">Review Date *</label>
+                <input id="reviewDate" type="date" required>
+              </div>
+              <div class="field">
+                <label for="reviewTime">Review Time</label>
+                <input id="reviewTime" type="time">
+              </div>
+              <div class="field">
+                <label for="reviewScore">Score (0–100)</label>
+                <input id="reviewScore" type="number" min="0" max="100" placeholder="e.g. 85">
+              </div>
+              <div class="field full">
+                <label for="reviewLink">Meeting Link</label>
+                <input id="reviewLink" type="url" placeholder="https://meet.google.com/...">
+              </div>
+              <div class="field full">
+                <label for="reviewFeedback">Feedback / Required Changes</label>
+                <textarea id="reviewFeedback" rows="3" placeholder="Enter feedback and improvements needed..."></textarea>
+              </div>
+              <div class="field">
+                <label for="reviewStatus">Review Status</label>
+                <select id="reviewStatus">
+                  <option>Scheduled</option>
+                  <option>Completed</option>
+                  <option>Cancelled</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-primary" type="submit">Save Review</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="panel">
+          <div class="panel-heading"><h2>Review Schedule and History</h2></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th>Intern</th><th>Date / Time</th><th>Score</th>
+                <th>Status</th><th>Feedback</th><th>Actions</th>
+              </tr></thead>
+              <tbody id="reviewTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </div>
+    <div class="footer">InternFlow · Internship Management System</div>
+  </main>
+</div>
+
+<script>
+const STORAGE_KEY = "internFlowDataV1";
+
+function makeId(prefix) {
+  return prefix + Date.now().toString(36) +
+    Math.random().toString(36).slice(2, 6);
+}
+
+function initialData() {
+  const interns = Array.from({ length: 10 }, (_, i) => ({
+    id: "INT" + String(i + 1).padStart(3, "0"),
+    name: "Sample Intern " + (i + 1),
+    email: "intern" + (i + 1) + "@example.com",
+    joining: "",
+    duration: "3 months",
+    topic: "Artificial Intelligence",
+    status: "Active"
+  }));
+  return { interns, tasks: [], reviews: [] };
+}
+
+function loadData() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed && Array.isArray(parsed.interns) &&
+          Array.isArray(parsed.tasks) && Array.isArray(parsed.reviews)) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.warn("Could not load saved data", e);
+  }
+  return initialData();
+}
+
+let data = loadData();
+
+function saveData() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (e) {
+    alert("Your browser could not save the data. Export a backup and check browser storage settings.");
+  }
+  renderAll();
+}
+
+function esc(value) {
+  return String(value ?? "").replace(/[&<>"']/g, ch => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;",
+    '"': "&quot;", "'": "&#39;"
+  })[ch]);
+}
+
+function personName(id) {
+  const person = data.interns.find(x => x.id === id);
+  return person ? person.name : "Deleted intern";
+}
+
+function fmtDate(value) {
+  if (!value) return "—";
+  const parts = value.split("-");
+  if (parts.length !== 3) return value;
+  return parts[2] + "/" + parts[1] + "/" + parts[0];
+}
+
+function badgeClass(status) {
+  if (["Active", "Completed"].includes(status)) {
+    return status.toLowerCase();
+  }
+  if (["In Progress"].includes(status)) return "progress";
+  if (["Scheduled", "Pending"].includes(status)) return status.toLowerCase();
+  if (status === "Overdue") return "overdue";
+  return "";
+}
+
+function badge(status) {
+  return '<span class="badge ' + badgeClass(status) + '">' +
+    esc(status) + '</span>';
+}
+
+function showPage(pageId) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.getElementById(pageId).classList.add("active");
+
+  document.querySelectorAll(".nav-btn[data-page]").forEach(b => {
+    b.classList.toggle("active", b.dataset.page === pageId);
+  });
+
+  const titles = {
+    dashboard: "Dashboard",
+    interns: "Intern Records",
+    tasks: "Task Management",
+    reviews: "Review Management"
+  };
+  document.getElementById("topTitle").textContent = titles[pageId];
+}
+
+document.querySelectorAll(".nav-btn[data-page]").forEach(button => {
+  button.addEventListener("click", () => showPage(button.dataset.page));
+});
+
+function resetInternForm() {
+  document.getElementById("internForm").reset();
+  document.getElementById("internEditId").value = "";
+  document.getElementById("internFormTitle").textContent = "Add New Intern";
+}
+
+function renderInterns() {
+  const search = document.getElementById("internSearch").value.toLowerCase();
+  const list = data.interns.filter(i =>
+    [i.id, i.name, i.email, i.topic].some(v =>
+      String(v || "").toLowerCase().includes(search)
+    )
+  );
+
+  document.getElementById("internTable").innerHTML = list.length
+    ? list.map(i => `<tr>
+        <td><div class="person">${esc(i.name)}</div>
+          <div class="secondary">${esc(i.id)}</div></td>
+        <td>${esc(i.email)}</td>
+        <td>${fmtDate(i.joining)}</td>
+        <td>${esc(i.topic || "—")}</td>
+        <td>${badge(i.status)}</td>
+        <td><div class="actions">
+          <button class="btn btn-light btn-small" onclick="editIntern('${esc(i.id)}')">Edit</button>
+          <button class="btn btn-danger btn-small" onclick="deleteIntern('${esc(i.id)}')">Delete</button>
+        </div></td>
+      </tr>`).join("")
+    : '<tr><td colspan="6" class="empty">No interns found.</td></tr>';
+}
+
+function renderInternOptions() {
+  const options = data.interns.map(i =>
+    `<option value="${esc(i.id)}">${esc(i.id)} — ${esc(i.name)}</option>`
+  ).join("");
+
+  ["taskIntern", "reviewIntern"].forEach(id => {
+    const el = document.getElementById(id);
+    const previous = el.value;
+    el.innerHTML = options || '<option value="">Add an intern first</option>';
+    if (data.interns.some(i => i.id === previous)) el.value = previous;
+    el.disabled = data.interns.length === 0;
+  });
+}
+
+document.getElementById("internForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const editId = document.getElementById("internEditId").value;
+  const email = document.getElementById("internEmail").value.trim();
+
+  if (data.interns.some(i =>
+      i.email.toLowerCase() === email.toLowerCase() && i.id !== editId)) {
+    alert("An intern with this email already exists.");
+    return;
+  }
+
+  const item = {
+    id: editId || "INT" + String(
+      Math.max(0, ...data.interns.map(i =>
+        Number(i.id.replace("INT", "")) || 0)) + 1
+    ).padStart(3, "0"),
+    name: document.getElementById("internName").value.trim(),
+    email,
+    joining: document.getElementById("internJoining").value,
+    duration: document.getElementById("internDuration").value,
+    topic: document.getElementById("internTopic").value.trim(),
+    status: document.getElementById("internStatus").value
+  };
+
+  if (editId) {
+    data.interns = data.interns.map(i => i.id === editId ? item : i);
+  } else {
+    data.interns.push(item);
+  }
+
+  saveData();
+  resetInternForm();
+  alert("Intern record saved.");
+});
+
+function editIntern(id) {
+  const i = data.interns.find(x => x.id === id);
+  if (!i) return;
+  document.getElementById("internEditId").value = i.id;
+  document.getElementById("internName").value = i.name;
+  document.getElementById("internEmail").value = i.email;
+  document.getElementById("internJoining").value = i.joining || "";
+  document.getElementById("internDuration").value = i.duration;
+  document.getElementById("internTopic").value = i.topic;
+  document.getElementById("internStatus").value = i.status;
+  document.getElementById("internFormTitle").textContent = "Edit Intern";
+  showPage("interns");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function deleteIntern(id) {
+  if (!confirm("Delete this intern? Their tasks and reviews will also be deleted.")) return;
+  data.interns = data.interns.filter(i => i.id !== id);
+  data.tasks = data.tasks.filter(t => t.internId !== id);
+  data.reviews = data.reviews.filter(r => r.internId !== id);
+  saveData();
+}
+
+document.getElementById("internSearch").addEventListener("input", renderInterns);
+
+document.getElementById("taskForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const task = {
+    id: makeId("T"),
+    internId: document.getElementById("taskIntern").value,
+    title: document.getElementById("taskTitle").value.trim(),
+    description: document.getElementById("taskDescription").value.trim(),
+    deadline: document.getElementById("taskDeadline").value,
+    status: document.getElementById("taskStatus").value
+  };
+  if (!task.internId) return alert("Please add an intern first.");
+  data.tasks.unshift(task);
+  saveData();
+  e.target.reset();
+  alert("Task assigned successfully.");
+});
+
+document.getElementById("taskFilter").addEventListener("change", renderTasks);
+
+function renderTasks() {
+  const filter = document.getElementById("taskFilter").value;
+  const tasks = data.tasks.filter(t => filter === "All" || t.status === filter);
+
+  document.getElementById("taskTable").innerHTML = tasks.length
+    ? tasks.map(t => `<tr>
+        <td><div class="person">${esc(t.title)}</div>
+          <div class="secondary">${esc(t.description || "")}</div></td>
+        <td>${esc(personName(t.internId))}</td>
+        <td>${fmtDate(t.deadline)}</td>
+        <td><select aria-label="Task status" onchange="updateTaskStatus('${esc(t.id)}',this.value)">
+          ${["Pending","In Progress","Completed"].map(s =>
+            `<option ${t.status === s ? "selected" : ""}>${s}</option>`
+          ).join("")}
+        </select></td>
+        <td><button class="btn btn-danger btn-small" onclick="deleteTask('${esc(t.id)}')">Delete</button></td>
+      </tr>`).join("")
+    : '<tr><td colspan="5" class="empty">No tasks found. Assign your first task above.</td></tr>';
+}
+
+function updateTaskStatus(id, status) {
+  const t = data.tasks.find(x => x.id === id);
+  if (t) { t.status = status; saveData(); }
+}
+
+function deleteTask(id) {
+  if (!confirm("Delete this task?")) return;
+  data.tasks = data.tasks.filter(t => t.id !== id);
+  saveData();
+}
+
+document.getElementById("reviewForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const scoreText = document.getElementById("reviewScore").value;
+  const score = scoreText === "" ? "" : Number(scoreText);
+
+  if (score !== "" && (score < 0 || score > 100)) {
+    alert("Score must be between 0 and 100.");
+    return;
+  }
+
+  const review = {
+    id: makeId("R"),
+    internId: document.getElementById("reviewIntern").value,
+    date: document.getElementById("reviewDate").value,
+    time: document.getElementById("reviewTime").value,
+    score,
+    link: document.getElementById("reviewLink").value.trim(),
+    feedback: document.getElementById("reviewFeedback").value.trim(),
+    status: document.getElementById("reviewStatus").value
+  };
+
+  if (!review.internId) return alert("Please add an intern first.");
+  data.reviews.unshift(review);
+  saveData();
+  e.target.reset();
+  alert("Review saved successfully.");
+});
+
+function renderReviews() {
+  const list = [...data.reviews].sort((a,b) =>
+    (a.date || "").localeCompare(b.date || "")
+  );
+
+  document.getElementById("reviewTable").innerHTML = list.length
+    ? list.map(r => `<tr>
+        <td>${esc(personName(r.internId))}</td>
+        <td>${fmtDate(r.date)}<div class="secondary">${esc(r.time || "Time not set")}</div>
+          ${r.link ? `<div class="secondary"><a href="${esc(r.link)}" target="_blank" rel="noopener noreferrer">Meeting link</a></div>` : ""}
+        </td>
+        <td>${r.score === "" ? "—" : esc(r.score + "/100")}</td>
+        <td><select aria-label="Review status" onchange="updateReviewStatus('${esc(r.id)}',this.value)">
+          ${["Scheduled","Completed","Cancelled"].map(s =>
+            `<option ${r.status === s ? "selected" : ""}>${s}</option>`
+          ).join("")}
+        </select></td>
+        <td>${esc(r.feedback || "—")}</td>
+        <td><button class="btn btn-danger btn-small" onclick="deleteReview('${esc(r.id)}')">Delete</button></td>
+      </tr>`).join("")
+    : '<tr><td colspan="6" class="empty">No reviews scheduled yet.</td></tr>';
+}
+
+function updateReviewStatus(id, status) {
+  const r = data.reviews.find(x => x.id === id);
+  if (r) { r.status = status; saveData(); }
+}
+
+function deleteReview(id) {
+  if (!confirm("Delete this review?")) return;
+  data.reviews = data.reviews.filter(r => r.id !== id);
+  saveData();
+}
+
+function renderDashboard() {
+  const today = new Date().toISOString().slice(0, 10);
+
+  document.getElementById("totalInterns").textContent = data.interns.length;
+  document.getElementById("activeInterns").textContent =
+    data.interns.filter(i => i.status === "Active").length;
+  document.getElementById("pendingTasks").textContent =
+    data.tasks.filter(t => t.status !== "Completed").length;
+  document.getElementById("upcomingReviews").textContent =
+    data.reviews.filter(r => r.status === "Scheduled" && r.date >= today).length;
+
+  const recentTasks = data.tasks.slice(0, 5);
+  document.getElementById("dashboardTasks").innerHTML = recentTasks.length
+    ? `<div class="table-wrap"><table><thead><tr><th>Task</th><th>Intern</th><th>Status</th></tr></thead><tbody>` +
+      recentTasks.map(t => `<tr><td>${esc(t.title)}</td><td>${esc(personName(t.internId))}</td><td>${badge(t.status)}</td></tr>`).join("") +
+      `</tbody></table></div>`
+    : '<div class="empty">No tasks yet. Use Task Management to assign one.</div>';
+
+  const upcoming = data.reviews
+    .filter(r => r.status === "Scheduled" && r.date >= today)
+    .sort((a,b) => a.date.localeCompare(b.date))
+    .slice(0, 5);
+
+  document.getElementById("dashboardReviews").innerHTML = upcoming.length
+    ? `<div class="table-wrap"><table><thead><tr><th>Intern</th><th>Date</th><th>Status</th></tr></thead><tbody>` +
+      upcoming.map(r => `<tr><td>${esc(personName(r.internId))}</td><td>${fmtDate(r.date)}</td><td>${badge(r.status)}</td></tr>`).join("") +
+      `</tbody></table></div>`
+    : '<div class="empty">No upcoming reviews. Schedule one in Review Management.</div>';
+}
+
+function renderAll() {
+  renderInternOptions();
+  renderInterns();
+  renderTasks();
+  renderReviews();
+  renderDashboard();
+}
+
+document.getElementById("exportBtn").addEventListener("click", () => {
+  const blob = new Blob([JSON.stringify(data, null, 2)], {
+    type: "application/json"
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "internship-backup.json";
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById("importBtn").addEventListener("click", () => {
+  document.getElementById("importFile").click();
+});
+
+document.getElementById("importFile").addEventListener("change", async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    const imported = JSON.parse(await file.text());
+    if (!imported || !Array.isArray(imported.interns) ||
+        !Array.isArray(imported.tasks) || !Array.isArray(imported.reviews)) {
+      throw new Error("Invalid backup");
+    }
+    if (!confirm("Importing this backup will replace the current website data. Continue?")) return;
+    data = imported;
+    saveData();
+    alert("Backup imported successfully.");
+  } catch (err) {
+    alert("Could not import this file. Please choose a valid internship-backup.json file.");
+  } finally {
+    e.target.value = "";
+  }
+});
+
+renderAll();
+</script>
+</body>
+</html>
